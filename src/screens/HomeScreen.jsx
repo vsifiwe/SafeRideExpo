@@ -1,55 +1,76 @@
 import { StyleSheet, Text, View, Dimensions, TextInput, KeyboardAvoidingView, Platform } from 'react-native'
-import React, { useState } from 'react'
-import { SafeCard } from '../components'
-import MapView from 'react-native-maps';
+import React, { useState, useEffect } from 'react'
+import MapView, { Marker } from 'react-native-maps';
 import { Button } from '@ui-kitten/components';
+import * as Location from 'expo-location';
 
 var device_width = Dimensions.get('window').width - 40;
 
-const data = [{
-    "name": "Mungwarakarama Seleman",
-    "image": "https://res.cloudinary.com/dqezkzxkq/image/upload/v1680961218/1_juglpa.png",
-    "quality": "Punctual, courteous"
-},
-{
-    "name": "Elvis Niyonkuru",
-    "image": "https://res.cloudinary.com/dqezkzxkq/image/upload/v1680961218/Elvis_gqndyo.png",
-    "quality": "Experienced driver (many driving categories)"
-},
-{
-    "name": "Rwabilinda Dylan",
-    "image": "https://res.cloudinary.com/dqezkzxkq/image/upload/v1680961218/Dylan_trxtdv.png",
-    "quality": "Polyglot (French, English, Swahili, Kinyarwanda)"
-}]
 const HomeScreen = ({ navigation }) => {
-
+    // "latitude": -1.9355926, "longitude": 30.1582863
+    const [locations, setLocations] = useState([{
+        latitude: -1.9355926,
+        longitude: 30.1582863,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+    }])
+    const [errorMsg, setErrorMsg] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [location, setLocation] = useState({
         latitude: -1.970579,
         longitude: 30.104429,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
     })
+
+    useEffect(() => {
+        (async () => {
+
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setErrorMsg('Permission to access location was denied');
+                return;
+            }
+            let loc = await Location.getCurrentPositionAsync({});
+            let allLocations = locations;
+            let coords = loc.coords;
+            coords.latitudeDelta = 0.0922;
+            coords.longitudeDelta = 0.0421;
+            setLocation(loc.coords)
+            allLocations.push(loc.coords)
+            setLocations(allLocations)
+            setLoading(false);
+        })();
+    }, []);
     const [text, onChangeText] = useState('');
     return (
         <View style={styles.container}>
-            {/* {
-                data.map((d, i) => {
-                    return (
-                        <SafeCard data={d} action={() => navigation.navigate("Booking", { 'details': d })} />
-                    )
-                })
-            } */}
-            <MapView style={styles.map} region={location} />
-            <KeyboardAvoidingView style={styles.textBox} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-                <TextInput
-                    onChangeText={onChangeText}
-                    value={text}
-                    style={styles.textInput}
-                    placeholder='Where are you going?'
-                />
-                {/* <Text>Hello, World!</Text> */}
-                <Button style={styles.button} onPress={() => navigation.navigate("Booking", { 'destination': text })}>Done</Button>
-            </KeyboardAvoidingView>
+            {
+                loading ?
+                    <Text>Loading</Text> :
+                    <>
+                        <MapView style={styles.map} region={location}>
+                            {
+                                locations.map((lo, index) => (
+                                    <Marker key={index} coordinate={{latitude: lo.latitude, longitude: lo.longitude}} title='Here'/>
+                                ))
+                            }
+                        </MapView>
+
+
+                        <KeyboardAvoidingView style={styles.textBox} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                            <TextInput
+                                onChangeText={onChangeText}
+                                value={text}
+                                style={styles.textInput}
+                                placeholder='Where are you going?'
+                            />
+                            {/* <Text>Hello, World!</Text> */}
+                            <Button style={styles.button} onPress={() => navigation.navigate("Driver", { 'destination': text, 'location': location })}>Done</Button>
+                        </KeyboardAvoidingView>
+                    </>
+            }
+
 
         </View>
     )
@@ -60,8 +81,7 @@ export default HomeScreen
 const styles = StyleSheet.create({
     container: {
         flex: 1
-        // marginHorizontal: 15,
-        // marginTop: 30
+        
     },
     map: {
         width: '100%',
@@ -84,7 +104,7 @@ const styles = StyleSheet.create({
         margin: 18,
         padding: 10,
         borderRadius: 7
-    }, 
+    },
     button: {
         marginHorizontal: 36,
         borderRadius: 7

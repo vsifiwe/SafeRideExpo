@@ -15,6 +15,7 @@ const BookingScreen = ({navigation,  route }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.text}>Driver Name: <Text style={styles.bold}>{route.params.details.name}</Text></Text>
       <Text>Destination: <Text style={styles.bold}>{route.params.destination}</Text></Text>
       <Text style={styles.text}>Choose preferred pickup time:</Text>
       <Select
@@ -69,6 +70,6 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: "800", 
-    fontSize: 16
+    fontSize: 16,
   }
 })

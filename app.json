@@ -11,7 +11,15 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Safe Ride to use your location."
+        }
+      ]
+    ],
+        "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
@@ -22,7 +30,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.asifiwe.SafeRideExpo"
+      "package": "com.asifiwe.SafeRideExpo",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDDlCnqPq35TgKh6Jg8yt3no3cXSsZowfs"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
